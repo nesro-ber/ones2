@@ -62,14 +62,56 @@ export class MemStorage implements IStorage {
     this.createFaq({ question: "Comment demander un congé?", answer: "Allez dans la section Congés et cliquez sur 'Nouvelle demande'." });
     this.createFaq({ question: "Où trouver mes fiches de paie?", answer: "Dans la section Documents, demandez un Relevé des émoluments." });
 
+    // Add active missions
     this.missions.set(this.currentId.missions, {
       id: this.currentId.missions++,
       userId: 1,
       title: "Visite site Hassi Messaoud",
-      description: "Inspection des installations.",
+      description: "Inspection des installations de forage.",
       status: "active",
       reportText: null,
       createdAt: new Date()
+    });
+
+    this.missions.set(this.currentId.missions, {
+      id: this.currentId.missions++,
+      userId: 1,
+      title: "Réunion avec Partenaires Internationaux",
+      description: "Négociation des nouveaux contrats pour Q2 2026.",
+      status: "active",
+      reportText: null,
+      createdAt: new Date()
+    });
+
+    // Add completed missions with reports
+    this.missions.set(this.currentId.missions, {
+      id: this.currentId.missions++,
+      userId: 1,
+      title: "Audit Site Skikda",
+      description: "Vérification de conformité des équipements de sécurité.",
+      status: "completed",
+      reportText: "Audit complété avec succès. Tous les équipements conformes aux normes internationales. Rapport détaillé en annexe.",
+      createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+    });
+
+    this.missions.set(this.currentId.missions, {
+      id: this.currentId.missions++,
+      userId: 1,
+      title: "Formation Équipe Maintenance",
+      description: "Formation sur les nouveaux protocoles de maintenance.",
+      status: "completed",
+      reportText: "Formation dispensée à 15 participants. Tous les objectifs atteints.",
+      createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
+    });
+
+    this.missions.set(this.currentId.missions, {
+      id: this.currentId.missions++,
+      userId: 1,
+      title: "Visite Client Alger",
+      description: "Présentation des services et signature de contrat.",
+      status: "completed",
+      reportText: "Contrat signé avec succès. Client satisfait des propositions.",
+      createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
     });
 
     // Seed some requests with new status flow

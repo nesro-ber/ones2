@@ -11,7 +11,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { FileText, Plus, Check, X, Clock, CalendarIcon, ChevronRight } from "lucide-react";
+import { FileText, Plus, Check, X, Clock, CalendarIcon, ChevronRight, Download } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import type { Request } from "@shared/schema";
@@ -108,6 +108,16 @@ function RequestItem({ request, role }: { request: Request, role: string }) {
     return documentType ? types[documentType] || documentType : '';
   };
 
+  const handleDownloadFile = (fileData: string | undefined, fileName: string | undefined) => {
+    if (!fileData || !fileName) return;
+    const link = document.createElement('a');
+    link.href = fileData;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleAction = (newStatus: string) => {
     updateStatus({ id: request.id, status: newStatus });
   };
@@ -118,111 +128,103 @@ function RequestItem({ request, role }: { request: Request, role: string }) {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-5 rounded-2xl border border-slate-100 bg-white hover:shadow-lg transition-all duration-300 group">
-      <div className="flex flex-col sm:flex-row gap-4 items-start">
-        <div className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100 group-hover:scale-110 transition-transform duration-300">
-          {getIcon(request.type)}
+    <div className="flex flex-col sm:flex-row gap-4 p-4 border border-slate-200 rounded-xl hover:shadow-md transition-all duration-300 items-start">
+      <div className="h-10 w-10 rounded-lg bg-slate-50 flex items-center justify-center flex-shrink-0 border border-slate-100">
+        {getIcon(request.type)}
+      </div>
+      
+      <div className="flex-1 min-w-0">
+        <div className="flex flex-wrap items-center gap-2 mb-1">
+          <h4 className="font-semibold text-slate-900">
+            {request.type === 'leave' ? 'Demande de Congé' : 'Demande de Document'}
+          </h4>
+          {isRejected && <Badge variant="destructive" className="rounded-full px-2 py-0.5 text-xs font-semibold">Refusée</Badge>}
+          {!isRejected && request.status === 'completed' && <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none rounded-full px-2 py-0.5 text-xs font-semibold">Terminée</Badge>}
         </div>
         
-        <div className="flex-1 space-y-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h4 className="font-bold text-slate-900 capitalize text-lg">
-              {request.type === 'leave' ? 'Demande de Congé' : 'Demande de Document'}
-            </h4>
-            {isRejected && <Badge variant="destructive" className="rounded-full px-3 py-1 font-bold">Refusée</Badge>}
-            {!isRejected && request.status === 'completed' && <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none rounded-full px-3 py-1 font-bold">Terminée</Badge>}
-          </div>
-          {request.type === 'document' && request.documentType && (
-            <p className="text-xs font-semibold text-primary uppercase tracking-wider">{getDocumentTypeLabel(request.documentType)}</p>
-          )}
-          <p className="text-sm text-slate-600 font-medium leading-relaxed">{request.description}</p>
+        {request.type === 'document' && request.documentType && (
+          <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-1">{getDocumentTypeLabel(request.documentType)}</p>
+        )}
+        
+        <p className="text-sm text-slate-600 mb-2">{request.description}</p>
+        
+        <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 mb-2">
+          <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {request.createdAt ? format(new Date(request.createdAt), 'dd MMM', { locale: fr }) : 'Récent'}</span>
           {request.fileName && (
-            <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-1">
-              <FileText className="h-3.5 w-3.5" /> Fichier joint: {request.fileName}
-            </p>
+            <span className="flex items-center gap-1 text-slate-500">
+              <FileText className="h-3.5 w-3.5" /> {request.fileName}
+            </span>
           )}
-          <div className="flex items-center gap-4 text-xs text-slate-400 font-bold uppercase tracking-wider mt-2">
-            <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> {request.createdAt ? format(new Date(request.createdAt), 'dd MMM yyyy', { locale: fr }) : 'Récent'}</span>
-            {role !== 'agent' && <span className="text-slate-500">Employé ID: {request.userId}</span>}
-          </div>
         </div>
-
-        {((role === 'manager' && request.status === 'submitted') || 
-          (role === 'hr' && request.status === 'validated_manager')) && !isRejected && (
-          <div className="flex items-center gap-2 shrink-0 self-center">
-            <Button 
-              size="sm" 
-              className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold px-4"
-              onClick={() => handleAction(role === 'manager' ? 'validated_manager' : 'approved_hr')}
-              disabled={isPending}
-            >
-              <Check className="h-4 w-4 mr-1.5" /> {role === 'manager' ? 'Valider' : 'Approuver'}
-            </Button>
-            <Button 
-              size="sm" 
-              variant="outline"
-              className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 rounded-xl font-bold px-4"
-              onClick={handleReject}
-              disabled={isPending}
-            >
-              <X className="h-4 w-4 mr-1.5" /> Refuser
-            </Button>
-          </div>
-        )}
-
-        {role === 'hr' && request.status === 'approved_hr' && (
-          <Button 
-            size="sm" 
-            className="bg-slate-700 hover:bg-slate-800 text-white rounded-xl font-bold px-4 self-center"
-            onClick={() => handleAction('completed')}
-            disabled={isPending}
-          >
-            <Check className="h-4 w-4 mr-1.5" /> Marquer comme complétée
-          </Button>
-        )}
-      </div>
-
-      {!isRejected && (
-        <div className="pt-2">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Étape actuelle: {currentStepIndex >= 0 ? STEPS[currentStepIndex].label : 'Inconnu'}</span>
-            <span className="text-xs font-bold text-primary">{currentStepIndex + 1} / 4</span>
-          </div>
-          <div className="flex items-center gap-1 sm:gap-2">
+        
+        {!isRejected && (
+          <div className="flex items-center gap-1 sm:gap-2 mb-3">
             {STEPS.map((step, index) => {
               const isPast = index < currentStepIndex;
               const isCurrent = index === currentStepIndex;
               return (
-                <div key={step.id} className="flex-1 flex items-center gap-1 sm:gap-2">
-                  <div className="relative flex-1">
-                    <div className={`h-2 w-full rounded-full transition-colors duration-500 ${isPast || isCurrent ? step.color : 'bg-slate-100'}`} />
-                    {isCurrent && (
-                      <div className={`absolute -top-1 left-0 h-4 w-4 rounded-full border-2 border-white ring-2 ${step.color} animate-pulse`} />
-                    )}
-                  </div>
-                  {index < STEPS.length - 1 && (
-                    <ChevronRight className={`h-3 w-3 shrink-0 transition-colors ${index < currentStepIndex ? 'text-slate-400' : 'text-slate-200'}`} />
-                  )}
+                <div key={step.id} className="flex-1 h-1.5 rounded-full bg-slate-100 relative" style={{ backgroundColor: isPast || isCurrent ? undefined : undefined }}>
+                  <div className={`h-full rounded-full transition-colors ${isPast || isCurrent ? step.color : 'bg-slate-100'}`} />
                 </div>
               );
             })}
           </div>
-          <div className="grid grid-cols-4 gap-1 mt-3">
-            {STEPS.map((step, index) => (
-              <span key={step.id} className={`text-[9px] sm:text-[10px] text-center font-bold leading-tight ${index <= currentStepIndex ? 'text-slate-600' : 'text-slate-300'}`}>
-                {step.label}
-              </span>
-            ))}
-          </div>
+        )}
+
+        <div className="flex flex-wrap items-center gap-2">
+          {((role === 'manager' && request.status === 'submitted') || 
+            (role === 'hr' && request.status === 'validated_manager')) && !isRejected && (
+            <>
+              <Button 
+                size="sm" 
+                className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg h-8 text-xs font-semibold"
+                onClick={() => handleAction(role === 'manager' ? 'validated_manager' : 'approved_hr')}
+                disabled={isPending}
+              >
+                <Check className="h-3.5 w-3.5 mr-1" /> {role === 'manager' ? 'Valider' : 'Approuver'}
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 rounded-lg h-8 text-xs font-semibold"
+                onClick={handleReject}
+                disabled={isPending}
+              >
+                <X className="h-3.5 w-3.5 mr-1" /> Refuser
+              </Button>
+            </>
+          )}
+
+          {role === 'hr' && request.status === 'approved_hr' && (
+            <Button 
+              size="sm" 
+              className="bg-slate-700 hover:bg-slate-800 text-white rounded-lg h-8 text-xs font-semibold"
+              onClick={() => handleAction('completed')}
+              disabled={isPending}
+            >
+              <Check className="h-3.5 w-3.5 mr-1" /> Marquer comme complétée
+            </Button>
+          )}
+
+          {request.fileName && request.fileData && (
+            <Button 
+              size="sm"
+              variant="outline"
+              className="rounded-lg h-8 text-xs font-semibold text-primary border-primary/30 hover:bg-primary/5"
+              onClick={() => handleDownloadFile(request.fileData, request.fileName)}
+              data-testid="button-download-file"
+            >
+              <Download className="h-3.5 w-3.5 mr-1" /> Télécharger
+            </Button>
+          )}
         </div>
-      )}
+      </div>
 
       {isRejected && (
-        <div className="mt-2 p-4 bg-red-50 border border-red-100 rounded-2xl flex gap-3 items-start animate-in fade-in zoom-in duration-300">
-          <AlertCircle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <h5 className="font-bold text-red-900 text-sm uppercase tracking-wider">Demande Refusée</h5>
-            <p className="text-sm text-red-700 font-medium">{request.reason || "Aucun motif spécifié."}</p>
+        <div className="mt-2 p-3 bg-red-50 border border-red-100 rounded-lg flex gap-2 items-start w-full">
+          <AlertCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
+          <div className="space-y-0.5 text-sm">
+            <p className="font-semibold text-red-700">{request.reason || "Demande refusée"}</p>
           </div>
         </div>
       )}
