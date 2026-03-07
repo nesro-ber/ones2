@@ -1,0 +1,120 @@
+Projet : Portail RH pour SONATRACH – Site React (frontend uniquement, code simple,modern design with sidebar)
+
+Orange SONATRACH (accent / boutons / highlights) → #FF6600
+
+Blanc (fond / zones principales) → #FFFFFF
+
+Gris intermédiaire (texte secondaire / bordures / cartes) → #A0A0A0
+
+Fonctionnalités par rôle :
+
+Agent (Employé)
+
+Profil
+
+Consulter ses informations personnelles
+
+Demander correction d’informations
+
+Demander changement de mot de passe (limité)
+
+Missions
+
+Consulter missions + historique
+
+Établir un rapport sur mission
+
+Congés
+
+Consulter ses congés + historique
+
+Soumettre une demande de congé (option fichier/photo)
+
+Demandes de documents
+
+Attestation
+
+Relevé des émoluments
+
+Demande de document lié aux congés
+
+Consulter l’historique des demandes
+
+Télécharger les documents validés
+
+Notifications
+
+Consulter notifications liées aux demandes ou messages RH
+
+Calendrier
+
+Consulter calendrier (pointages, jours fériés, jours de congé)
+
+Chatbot / FAQ
+
+Poser des questions fréquentes et consulter réponses automatiques
+
+Responsable
+
+Calendrier
+
+Voir son calendrier + calendrier des agents de son service
+
+Traitement des demandes
+
+Consulter, valider ou refuser (avec motif) les demandes de congés et documents
+
+Rapports de missions
+
+Consulter rapports et télécharger PDF
+
+Répondre aux questions
+
+Répondre aux questions des agents (FAQ ou demandes directes)
+
+RH (Agent RH)
+
+Calendrier
+
+Voir le calendrier de tous les employés
+
+Traitement des demandes
+
+Valider/refuser/modifier toutes les demandes (congés, documents)
+
+Historique complet des demandes
+
+Recrutement
+
+Suivi des demandes d’ajout d’agents (création finale par Admin)
+
+Répondre aux questions
+
+Répondre aux questions des employés
+
+Admin
+
+Gestion des employés
+
+Ajouter / modifier / supprimer / rechercher un employé
+
+Gestion de l’aide / FAQ
+
+Ajouter / modifier / supprimer / rechercher les questions/réponses
+
+Gestion des services / départements
+
+Ajouter / modifier / supprimer / rechercher un service ou département
+
+Configuration des demandes et documents
+
+Ajouter / modifier / supprimer / rechercher types de documents et demandes
+
+💡 Note pour l’AI / React
+
+Créer un menu ou dashboard par rôle et afficher les fonctionnalités selon le rôle connecté.
+
+Chaque fonction peut être un bouton / formulaire / tableau / liste.
+
+Simuler les données avec JSON ou useState/useEffect si pas de backend.
+
