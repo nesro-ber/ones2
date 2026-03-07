@@ -97,6 +97,17 @@ function RequestItem({ request, role }: { request: Request, role: string }) {
     return type === 'leave' ? <CalendarIcon className="h-5 w-5 text-blue-500" /> : <FileText className="h-5 w-5 text-purple-500" />;
   };
 
+  const getDocumentTypeLabel = (documentType?: string | null) => {
+    const types: Record<string, string> = {
+      'attestation_travail': 'Attestation de travail',
+      'releve_emolument': 'Relevé d\'émolument',
+      'certificat_travail': 'Certificat de travail',
+      'attestation_presence': 'Attestation de présence',
+      'autre': 'Autre document',
+    };
+    return documentType ? types[documentType] || documentType : '';
+  };
+
   const handleAction = (newStatus: string) => {
     updateStatus({ id: request.id, status: newStatus });
   };
@@ -121,7 +132,15 @@ function RequestItem({ request, role }: { request: Request, role: string }) {
             {isRejected && <Badge variant="destructive" className="rounded-full px-3 py-1 font-bold">Refusée</Badge>}
             {!isRejected && request.status === 'completed' && <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none rounded-full px-3 py-1 font-bold">Terminée</Badge>}
           </div>
+          {request.type === 'document' && request.documentType && (
+            <p className="text-xs font-semibold text-primary uppercase tracking-wider">{getDocumentTypeLabel(request.documentType)}</p>
+          )}
           <p className="text-sm text-slate-600 font-medium leading-relaxed">{request.description}</p>
+          {request.fileName && (
+            <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-1">
+              <FileText className="h-3.5 w-3.5" /> Fichier joint: {request.fileName}
+            </p>
+          )}
           <div className="flex items-center gap-4 text-xs text-slate-400 font-bold uppercase tracking-wider mt-2">
             <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> {request.createdAt ? format(new Date(request.createdAt), 'dd MMM yyyy', { locale: fr }) : 'Récent'}</span>
             {role !== 'agent' && <span className="text-slate-500">Employé ID: {request.userId}</span>}
@@ -213,17 +232,44 @@ function RequestItem({ request, role }: { request: Request, role: string }) {
 
 function CreateRequestForm({ onSuccess }: { onSuccess: () => void }) {
   const [type, setType] = useState('leave');
+  const [docType, setDocType] = useState('attestation_travail');
   const [desc, setDesc] = useState('');
+  const [fileName, setFileName] = useState('');
+  const [fileData, setFileData] = useState<string | null>(null);
   const { user } = useAuth();
   const { mutate, isPending } = useCreateRequest();
+
+  const documentTypes = [
+    { value: 'attestation_travail', label: 'Attestation de travail' },
+    { value: 'releve_emolument', label: 'Relevé d\'émolument / Fiche de paie' },
+    { value: 'certificat_travail', label: 'Certificat de travail' },
+    { value: 'attestation_presence', label: 'Attestation de présence' },
+    { value: 'autre', label: 'Autre document' },
+  ];
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFileName(file.name);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result as string;
+        setFileData(base64);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     mutate({
       userId: user.id,
       type,
+      documentType: type === 'document' ? docType : undefined,
       description: desc,
       status: 'submitted',
+      fileData: fileData || undefined,
+      fileName: fileName || undefined,
     }, {
       onSuccess: () => onSuccess()
     });
@@ -252,16 +298,49 @@ function CreateRequestForm({ onSuccess }: { onSuccess: () => void }) {
           </Select>
         </div>
 
+        {type === 'document' && (
+          <div className="space-y-2.5">
+            <label className="text-sm font-bold uppercase tracking-wider text-slate-500">Type de document</label>
+            <Select value={docType} onValueChange={setDocType}>
+              <SelectTrigger className="w-full rounded-xl h-12 border-slate-200 focus:ring-primary/20">
+                <SelectValue placeholder="Sélectionnez un document" />
+              </SelectTrigger>
+              <SelectContent>
+                {documentTypes.map(dt => (
+                  <SelectItem key={dt.value} value={dt.value} className="font-medium">{dt.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         <div className="space-y-2.5">
           <label className="text-sm font-bold uppercase tracking-wider text-slate-500">Description détaillée</label>
           <Textarea 
             required 
-            placeholder={type === 'leave' ? "Ex: Congé annuel du 10 au 15 Novembre..." : "Ex: Attestation de travail pour dossier bancaire..."}
+            placeholder={type === 'leave' ? "Ex: Congé annuel du 10 au 15 Novembre..." : "Ex: Demande d'attestation de travail pour dossier bancaire..."}
             className="min-h-[120px] rounded-xl resize-none border-slate-200 focus:ring-primary/20 p-4 font-medium"
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
           />
         </div>
+
+        {type === 'document' && (
+          <div className="space-y-2.5">
+            <label className="text-sm font-bold uppercase tracking-wider text-slate-500">Joindre un fichier (optionnel)</label>
+            <input
+              type="file"
+              onChange={handleFileChange}
+              className="block w-full text-sm border border-slate-200 rounded-xl p-2.5 cursor-pointer file:mr-4 file:rounded-xl file:border-0 file:bg-primary file:text-white file:font-medium file:px-4 file:py-2 file:cursor-pointer"
+              data-testid="input-file-upload"
+            />
+            {fileName && (
+              <p className="text-sm font-medium text-emerald-600 flex items-center gap-2">
+                <span className="text-emerald-500">✓</span> {fileName}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       <DialogFooter className="gap-2">

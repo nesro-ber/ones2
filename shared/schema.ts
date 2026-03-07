@@ -15,9 +15,12 @@ export const requests = pgTable("requests", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
   type: text("type").notNull(), // leave, document
+  documentType: text("document_type"), // attestation_travail, releve_emolument, certificat_travail, etc.
   status: text("status").notNull().default("submitted"), // submitted, validated_manager, approved_hr, completed, rejected
   description: text("description").notNull(),
   reason: text("reason"),
+  fileData: text("file_data"), // base64 encoded file
+  fileName: text("file_name"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -53,7 +56,11 @@ export const questions = pgTable("questions", {
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({ id: true });
-export const insertRequestSchema = createInsertSchema(requests).omit({ id: true, createdAt: true });
+export const insertRequestSchema = createInsertSchema(requests).omit({ id: true, createdAt: true }).extend({
+  documentType: z.string().optional(),
+  fileData: z.string().optional(),
+  fileName: z.string().optional(),
+});
 export const insertMissionSchema = createInsertSchema(missions).omit({ id: true, createdAt: true });
 export const insertFaqSchema = createInsertSchema(faqs).omit({ id: true });
 export const insertNotificationSchema = createInsertSchema(notifications).omit({ id: true, createdAt: true });
