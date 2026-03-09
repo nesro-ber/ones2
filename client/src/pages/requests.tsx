@@ -233,7 +233,6 @@ function RequestItem({ request, role }: { request: Request, role: string }) {
 }
 
 function CreateRequestForm({ onSuccess }: { onSuccess: () => void }) {
-  const [type, setType] = useState('leave');
   const [docType, setDocType] = useState('attestation_travail');
   const [desc, setDesc] = useState('');
   const [fileName, setFileName] = useState('');
@@ -266,8 +265,8 @@ function CreateRequestForm({ onSuccess }: { onSuccess: () => void }) {
     e.preventDefault();
     mutate({
       userId: user.id,
-      type,
-      documentType: type === 'document' ? docType : undefined,
+      type: 'document',
+      documentType: docType,
       description: desc,
       status: 'submitted',
       fileData: fileData || undefined,
@@ -288,61 +287,44 @@ function CreateRequestForm({ onSuccess }: { onSuccess: () => void }) {
 
       <div className="space-y-5">
         <div className="space-y-2.5">
-          <label className="text-sm font-bold uppercase tracking-wider text-slate-500">Type de demande</label>
-          <Select value={type} onValueChange={setType}>
+          <label className="text-sm font-bold uppercase tracking-wider text-slate-500">Type de document</label>
+          <Select value={docType} onValueChange={setDocType}>
             <SelectTrigger className="w-full rounded-xl h-12 border-slate-200 focus:ring-primary/20">
-              <SelectValue placeholder="Sélectionnez un type" />
+              <SelectValue placeholder="Sélectionnez un document" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="leave" className="font-medium">Congé / Absence</SelectItem>
-              <SelectItem value="document" className="font-medium">Attestation / Document</SelectItem>
+              {documentTypes.map(dt => (
+                <SelectItem key={dt.value} value={dt.value} className="font-medium">{dt.label}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
-
-        {type === 'document' && (
-          <div className="space-y-2.5">
-            <label className="text-sm font-bold uppercase tracking-wider text-slate-500">Type de document</label>
-            <Select value={docType} onValueChange={setDocType}>
-              <SelectTrigger className="w-full rounded-xl h-12 border-slate-200 focus:ring-primary/20">
-                <SelectValue placeholder="Sélectionnez un document" />
-              </SelectTrigger>
-              <SelectContent>
-                {documentTypes.map(dt => (
-                  <SelectItem key={dt.value} value={dt.value} className="font-medium">{dt.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
 
         <div className="space-y-2.5">
           <label className="text-sm font-bold uppercase tracking-wider text-slate-500">Description détaillée</label>
           <Textarea 
             required 
-            placeholder={type === 'leave' ? "Ex: Congé annuel du 10 au 15 Novembre..." : "Ex: Demande d'attestation de travail pour dossier bancaire..."}
+            placeholder="Ex: Demande d'attestation de travail pour dossier bancaire..."
             className="min-h-[120px] rounded-xl resize-none border-slate-200 focus:ring-primary/20 p-4 font-medium"
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
           />
         </div>
 
-        {type === 'document' && (
-          <div className="space-y-2.5">
-            <label className="text-sm font-bold uppercase tracking-wider text-slate-500">Joindre un fichier (optionnel)</label>
-            <input
-              type="file"
-              onChange={handleFileChange}
-              className="block w-full text-sm border border-slate-200 rounded-xl p-2.5 cursor-pointer file:mr-4 file:rounded-xl file:border-0 file:bg-primary file:text-white file:font-medium file:px-4 file:py-2 file:cursor-pointer"
-              data-testid="input-file-upload"
-            />
-            {fileName && (
-              <p className="text-sm font-medium text-emerald-600 flex items-center gap-2">
-                <span className="text-emerald-500">✓</span> {fileName}
-              </p>
-            )}
-          </div>
-        )}
+        <div className="space-y-2.5">
+          <label className="text-sm font-bold uppercase tracking-wider text-slate-500">Joindre un fichier (optionnel)</label>
+          <input
+            type="file"
+            onChange={handleFileChange}
+            className="block w-full text-sm border border-slate-200 rounded-xl p-2.5 cursor-pointer file:mr-4 file:rounded-xl file:border-0 file:bg-primary file:text-white file:font-medium file:px-4 file:py-2 file:cursor-pointer"
+            data-testid="input-file-upload"
+          />
+          {fileName && (
+            <p className="text-sm font-medium text-emerald-600 flex items-center gap-2">
+              <span className="text-emerald-500">✓</span> {fileName}
+            </p>
+          )}
+        </div>
       </div>
 
       <DialogFooter className="gap-2">

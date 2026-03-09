@@ -97,36 +97,6 @@ function MissionCard({ mission, role }: { mission: Mission, role: string }) {
         {mission.reportText && (
           <p className="text-xs text-slate-500 italic mb-3">Rapport: {mission.reportText.substring(0, 60)}...</p>
         )}
-
-        {(role === 'agent' || role === 'manager') && mission.status === 'active' && (
-          <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" className="bg-primary hover:bg-primary/90 text-white rounded-lg h-8 text-xs">
-                Rédiger le rapport
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px] rounded-2xl">
-              <DialogHeader>
-                <DialogTitle>Rapport de Mission</DialogTitle>
-                <DialogDescription>{mission.title}</DialogDescription>
-              </DialogHeader>
-              <div className="py-4">
-                <Textarea 
-                  placeholder="Décrivez les résultats de votre mission..."
-                  className="min-h-[150px] rounded-xl resize-none"
-                  value={reportText}
-                  onChange={(e) => setReportText(e.target.value)}
-                />
-              </div>
-              <DialogFooter>
-                <Button variant="ghost" onClick={() => setIsOpen(false)} className="rounded-xl">Annuler</Button>
-                <Button onClick={handleSubmit} disabled={isPending || !reportText} className="bg-primary rounded-xl">
-                  {isPending ? "Enregistrement..." : "Enregistrer"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )}
       </div>
     </div>
   );
