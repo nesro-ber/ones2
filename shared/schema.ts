@@ -81,6 +81,20 @@ export const passwordChangeRequests = pgTable("password_change_requests", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const recruitmentRequests = pgTable("recruitment_requests", {
+  id: serial("id").primaryKey(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  contractType: text("contract_type").notNull(), // CDI, CDD, Stage
+  proposedPosition: text("proposed_position").notNull(),
+  department: text("department"),
+  salary: text("salary"),
+  description: text("description"),
+  status: text("status").notNull().default("submitted"), // submitted, approved, rejected
+  reason: text("reason"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({ id: true });
 export const insertRequestSchema = createInsertSchema(requests).omit({ id: true, createdAt: true }).extend({
   documentType: z.string().optional(),
@@ -93,6 +107,7 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
 export const insertQuestionSchema = createInsertSchema(questions).omit({ id: true, createdAt: true });
 export const insertProfileCorrectionSchema = createInsertSchema(profileCorrections).omit({ id: true, createdAt: true });
 export const insertPasswordChangeRequestSchema = createInsertSchema(passwordChangeRequests).omit({ id: true, createdAt: true });
+export const insertRecruitmentRequestSchema = createInsertSchema(recruitmentRequests).omit({ id: true, createdAt: true });
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -117,3 +132,6 @@ export type InsertProfileCorrection = z.infer<typeof insertProfileCorrectionSche
 
 export type PasswordChangeRequest = typeof passwordChangeRequests.$inferSelect;
 export type InsertPasswordChangeRequest = z.infer<typeof insertPasswordChangeRequestSchema>;
+
+export type RecruitmentRequest = typeof recruitmentRequests.$inferSelect;
+export type InsertRecruitmentRequest = z.infer<typeof insertRecruitmentRequestSchema>;

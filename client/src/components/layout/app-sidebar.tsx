@@ -52,8 +52,6 @@ export function AppSidebar() {
           { title: "Gestion Demandes", url: "/requests", icon: FileText },
           { title: "Recrutement", url: "/recruitment", icon: UserPlus },
           { title: "Calendrier Global", url: "/calendar", icon: Calendar },
-          { title: "Historique & Logs", url: "/history", icon: FileText },
-          { title: "Répondre FAQ", url: "/faq", icon: HelpCircle },
         ];
       case 'admin':
         return [

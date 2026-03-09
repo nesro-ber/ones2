@@ -6,7 +6,8 @@ import {
   type Notification, type InsertNotification,
   type Question, type InsertQuestion,
   type ProfileCorrection, type InsertProfileCorrection,
-  type PasswordChangeRequest, type InsertPasswordChangeRequest
+  type PasswordChangeRequest, type InsertPasswordChangeRequest,
+  type RecruitmentRequest, type InsertRecruitmentRequest
 } from "@shared/schema";
 
 export interface IStorage {
@@ -45,6 +46,11 @@ export interface IStorage {
   getPasswordChangeRequests(): Promise<PasswordChangeRequest[]>;
   createPasswordChangeRequest(request: InsertPasswordChangeRequest): Promise<PasswordChangeRequest>;
   updatePasswordChangeRequestStatus(id: number, status: string, reason?: string): Promise<PasswordChangeRequest | undefined>;
+
+  // Recruitment Requests
+  getRecruitmentRequests(): Promise<RecruitmentRequest[]>;
+  createRecruitmentRequest(request: InsertRecruitmentRequest): Promise<RecruitmentRequest>;
+  updateRecruitmentRequestStatus(id: number, status: string, reason?: string): Promise<RecruitmentRequest | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -56,6 +62,7 @@ export class MemStorage implements IStorage {
   private questions: Map<number, Question>;
   private profileCorrections: Map<number, ProfileCorrection>;
   private passwordChangeRequests: Map<number, PasswordChangeRequest>;
+  private recruitmentRequests: Map<number, RecruitmentRequest>;
   private currentId: { [key: string]: number };
 
   constructor() {
@@ -67,7 +74,8 @@ export class MemStorage implements IStorage {
     this.questions = new Map();
     this.profileCorrections = new Map();
     this.passwordChangeRequests = new Map();
-    this.currentId = { users: 1, requests: 1, missions: 1, faqs: 1, notifications: 1, questions: 1, profileCorrections: 1, passwordChangeRequests: 1 };
+    this.recruitmentRequests = new Map();
+    this.currentId = { users: 1, requests: 1, missions: 1, faqs: 1, notifications: 1, questions: 1, profileCorrections: 1, passwordChangeRequests: 1, recruitmentRequests: 1 };
 
     // Seed mock data
     this.createUser({ 
@@ -260,6 +268,26 @@ export class MemStorage implements IStorage {
     
     const updated = { ...request, status, reason: reason || null };
     this.passwordChangeRequests.set(id, updated);
+    return updated;
+  }
+
+  async getRecruitmentRequests(): Promise<RecruitmentRequest[]> {
+    return Array.from(this.recruitmentRequests.values());
+  }
+
+  async createRecruitmentRequest(insertRequest: InsertRecruitmentRequest): Promise<RecruitmentRequest> {
+    const id = this.currentId.recruitmentRequests++;
+    const request: RecruitmentRequest = { ...insertRequest, id, createdAt: new Date() };
+    this.recruitmentRequests.set(id, request);
+    return request;
+  }
+
+  async updateRecruitmentRequestStatus(id: number, status: string, reason?: string): Promise<RecruitmentRequest | undefined> {
+    const request = this.recruitmentRequests.get(id);
+    if (!request) return undefined;
+    
+    const updated = { ...request, status, reason: reason || null };
+    this.recruitmentRequests.set(id, updated);
     return updated;
   }
 }
