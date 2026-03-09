@@ -14,12 +14,14 @@ import { FAQPage } from "./pages/faq";
 import { UsersPage } from "./pages/users";
 import { CalendarPage } from "./pages/calendar";
 import { RecruitmentPage } from "./pages/recruitment";
+import { ProfilePage } from "./pages/profile";
 
 function Router() {
   return (
     <AppLayout>
       <Switch>
         <Route path="/" component={Dashboard}/>
+        <Route path="/profile" component={ProfilePage}/>
         <Route path="/requests" component={RequestsPage}/>
         <Route path="/leaves" component={LeavesPage}/>
         <Route path="/missions" component={MissionsPage}/>

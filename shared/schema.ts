@@ -8,6 +8,13 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   role: text("role").notNull().default("agent"), // agent, manager, hr, admin
   fullName: text("full_name").notNull(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  matricule: text("matricule"),
+  email: text("email"),
+  hireDate: text("hire_date"),
+  familialStatus: text("familial_status"), // single, married, divorced, widowed
+  bloodType: text("blood_type"), // O+, O-, A+, A-, B+, B-, AB+, AB-
   department: text("department"),
 });
 
@@ -55,6 +62,25 @@ export const questions = pgTable("questions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const profileCorrections = pgTable("profile_corrections", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  fieldName: text("field_name").notNull(), // firstName, lastName, email, hireDate, etc
+  currentValue: text("current_value"),
+  newValue: text("new_value").notNull(),
+  status: text("status").notNull().default("submitted"), // submitted, approved, rejected
+  reason: text("reason"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const passwordChangeRequests = pgTable("password_change_requests", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  status: text("status").notNull().default("submitted"), // submitted, approved, rejected
+  reason: text("reason"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({ id: true });
 export const insertRequestSchema = createInsertSchema(requests).omit({ id: true, createdAt: true }).extend({
   documentType: z.string().optional(),
@@ -65,6 +91,8 @@ export const insertMissionSchema = createInsertSchema(missions).omit({ id: true,
 export const insertFaqSchema = createInsertSchema(faqs).omit({ id: true });
 export const insertNotificationSchema = createInsertSchema(notifications).omit({ id: true, createdAt: true });
 export const insertQuestionSchema = createInsertSchema(questions).omit({ id: true, createdAt: true });
+export const insertProfileCorrectionSchema = createInsertSchema(profileCorrections).omit({ id: true, createdAt: true });
+export const insertPasswordChangeRequestSchema = createInsertSchema(passwordChangeRequests).omit({ id: true, createdAt: true });
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -83,3 +111,9 @@ export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 
 export type Question = typeof questions.$inferSelect;
 export type InsertQuestion = z.infer<typeof insertQuestionSchema>;
+
+export type ProfileCorrection = typeof profileCorrections.$inferSelect;
+export type InsertProfileCorrection = z.infer<typeof insertProfileCorrectionSchema>;
+
+export type PasswordChangeRequest = typeof passwordChangeRequests.$inferSelect;
+export type InsertPasswordChangeRequest = z.infer<typeof insertPasswordChangeRequestSchema>;

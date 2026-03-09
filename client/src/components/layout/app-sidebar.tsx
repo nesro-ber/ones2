@@ -1,6 +1,6 @@
 import { 
   Home, FileText, Briefcase, Calendar, MessageSquare, 
-  Users, Settings, HelpCircle, UserPlus, Palmtree
+  Users, Settings, HelpCircle, UserPlus, Palmtree, User
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
@@ -30,6 +30,7 @@ export function AppSidebar() {
       case 'agent':
         return [
           ...baseItems,
+          { title: "Mon Profil", url: "/profile", icon: User },
           { title: "Mes Missions", url: "/missions", icon: Briefcase },
           { title: "Congés", url: "/leaves", icon: Palmtree },
           { title: "Demandes & Documents", url: "/requests", icon: FileText },
@@ -39,6 +40,7 @@ export function AppSidebar() {
       case 'manager':
         return [
           ...baseItems,
+          { title: "Mon Profil", url: "/profile", icon: User },
           { title: "Calendrier Équipe", url: "/calendar", icon: Calendar },
           { title: "Validation Demandes", url: "/requests", icon: FileText },
           { title: "Rapports Missions", url: "/missions", icon: Briefcase },
@@ -46,6 +48,7 @@ export function AppSidebar() {
       case 'hr':
         return [
           ...baseItems,
+          { title: "Mon Profil", url: "/profile", icon: User },
           { title: "Gestion Demandes", url: "/requests", icon: FileText },
           { title: "Recrutement", url: "/recruitment", icon: UserPlus },
           { title: "Calendrier Global", url: "/calendar", icon: Calendar },

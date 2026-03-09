@@ -4,7 +4,9 @@ import {
   type Mission, type InsertMission,
   type Faq, type InsertFaq,
   type Notification, type InsertNotification,
-  type Question, type InsertQuestion
+  type Question, type InsertQuestion,
+  type ProfileCorrection, type InsertProfileCorrection,
+  type PasswordChangeRequest, type InsertPasswordChangeRequest
 } from "@shared/schema";
 
 export interface IStorage {
@@ -33,6 +35,16 @@ export interface IStorage {
   // Questions
   getQuestions(): Promise<Question[]>;
   createQuestion(question: InsertQuestion): Promise<Question>;
+
+  // Profile Corrections
+  getProfileCorrections(): Promise<ProfileCorrection[]>;
+  createProfileCorrection(correction: InsertProfileCorrection): Promise<ProfileCorrection>;
+  updateProfileCorrectionStatus(id: number, status: string, reason?: string): Promise<ProfileCorrection | undefined>;
+
+  // Password Change Requests
+  getPasswordChangeRequests(): Promise<PasswordChangeRequest[]>;
+  createPasswordChangeRequest(request: InsertPasswordChangeRequest): Promise<PasswordChangeRequest>;
+  updatePasswordChangeRequestStatus(id: number, status: string, reason?: string): Promise<PasswordChangeRequest | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -42,6 +54,8 @@ export class MemStorage implements IStorage {
   private faqs: Map<number, Faq>;
   private notifications: Map<number, Notification>;
   private questions: Map<number, Question>;
+  private profileCorrections: Map<number, ProfileCorrection>;
+  private passwordChangeRequests: Map<number, PasswordChangeRequest>;
   private currentId: { [key: string]: number };
 
   constructor() {
@@ -51,10 +65,17 @@ export class MemStorage implements IStorage {
     this.faqs = new Map();
     this.notifications = new Map();
     this.questions = new Map();
-    this.currentId = { users: 1, requests: 1, missions: 1, faqs: 1, notifications: 1, questions: 1 };
+    this.profileCorrections = new Map();
+    this.passwordChangeRequests = new Map();
+    this.currentId = { users: 1, requests: 1, missions: 1, faqs: 1, notifications: 1, questions: 1, profileCorrections: 1, passwordChangeRequests: 1 };
 
     // Seed mock data
-    this.createUser({ username: "agent1", password: "pwd", role: "agent", fullName: "Ahmed Benali", department: "IT" });
+    this.createUser({ 
+      username: "agent1", password: "pwd", role: "agent", fullName: "Ahmed Benali", 
+      firstName: "Ahmed", lastName: "Benali", matricule: "AG001", 
+      email: "ahmed.benali@sonatrach.dz", hireDate: "2020-01-15",
+      familialStatus: "married", bloodType: "O+", department: "IT" 
+    });
     this.createUser({ username: "manager1", password: "pwd", role: "manager", fullName: "Karim Responsable", department: "IT" });
     this.createUser({ username: "hr1", password: "pwd", role: "hr", fullName: "Nadia RH", department: "HR" });
     this.createUser({ username: "admin1", password: "pwd", role: "admin", fullName: "Admin System", department: "Administration" });
@@ -200,6 +221,46 @@ export class MemStorage implements IStorage {
     const question: Question = { ...insertQuestion, id, createdAt: new Date() };
     this.questions.set(id, question);
     return question;
+  }
+
+  async getProfileCorrections(): Promise<ProfileCorrection[]> {
+    return Array.from(this.profileCorrections.values());
+  }
+
+  async createProfileCorrection(insertCorrection: InsertProfileCorrection): Promise<ProfileCorrection> {
+    const id = this.currentId.profileCorrections++;
+    const correction: ProfileCorrection = { ...insertCorrection, id, createdAt: new Date() };
+    this.profileCorrections.set(id, correction);
+    return correction;
+  }
+
+  async updateProfileCorrectionStatus(id: number, status: string, reason?: string): Promise<ProfileCorrection | undefined> {
+    const correction = this.profileCorrections.get(id);
+    if (!correction) return undefined;
+    
+    const updated = { ...correction, status, reason: reason || null };
+    this.profileCorrections.set(id, updated);
+    return updated;
+  }
+
+  async getPasswordChangeRequests(): Promise<PasswordChangeRequest[]> {
+    return Array.from(this.passwordChangeRequests.values());
+  }
+
+  async createPasswordChangeRequest(insertRequest: InsertPasswordChangeRequest): Promise<PasswordChangeRequest> {
+    const id = this.currentId.passwordChangeRequests++;
+    const request: PasswordChangeRequest = { ...insertRequest, id, createdAt: new Date() };
+    this.passwordChangeRequests.set(id, request);
+    return request;
+  }
+
+  async updatePasswordChangeRequestStatus(id: number, status: string, reason?: string): Promise<PasswordChangeRequest | undefined> {
+    const request = this.passwordChangeRequests.get(id);
+    if (!request) return undefined;
+    
+    const updated = { ...request, status, reason: reason || null };
+    this.passwordChangeRequests.set(id, updated);
+    return updated;
   }
 }
 
